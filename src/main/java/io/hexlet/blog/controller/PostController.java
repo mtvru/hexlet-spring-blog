@@ -14,14 +14,15 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 public class PostController {
-    private final List<Post> posts = new ArrayList<Post>();
-    private Long nextId = 1L;
+    private final List<Post> posts = new CopyOnWriteArrayList<>();
+    private final AtomicLong nextId = new AtomicLong(1);
 
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
@@ -31,7 +32,7 @@ public class PostController {
 
     @PostMapping("/posts")
     public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
-        post.setId(nextId++);
+        post.setId(nextId.getAndIncrement());
         posts.add(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
