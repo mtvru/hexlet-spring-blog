@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class Post {
+    private Long id;
     @NotBlank(message = "Title cannot be empty")
     private String title;
     @NotBlank
