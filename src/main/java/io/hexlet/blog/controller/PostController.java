@@ -44,11 +44,10 @@ public class PostController {
 
     @GetMapping("/posts/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-        return posts.stream()
+       Optional<Post> post = posts.stream()
                 .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .findFirst();
+       return ResponseEntity.of(post);
     }
 
     @PutMapping("/posts/{id}")
