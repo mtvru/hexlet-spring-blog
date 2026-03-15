@@ -1,5 +1,6 @@
 package io.hexlet.blog.controller;
 
+import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class PostController {
     }
 
     @PostMapping("/posts")
-    public Post create(@RequestBody Post post) {
+    public Post create(@Valid @RequestBody Post post) {
         posts.add(post);
         return post;
     }
@@ -37,7 +38,7 @@ public class PostController {
     }
 
     @PutMapping("/posts/{title}")
-    public Post update(@PathVariable String title, @RequestBody Post data) {
+    public Post update(@PathVariable String title, @Valid @RequestBody Post data) {
         var maybePost = posts.stream()
                 .filter(p -> p.getTitle().equals(title))
                 .findFirst();
