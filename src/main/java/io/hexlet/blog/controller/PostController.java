@@ -1,7 +1,11 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.repository.PostRepository;
 import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,27 +19,26 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
-    private final List<Post> posts = new CopyOnWriteArrayList<>();
-    private final AtomicLong nextId = new AtomicLong(1);
+    private final PostRepository postRepository;
+
+    public PostController(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     @GetMapping
-    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        List<Post> result = posts.stream().limit(limit).toList();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Page<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
+        Pageable pageable = PageRequest.ofSize(limit);
+        return ResponseEntity.ok(this.postRepository.findAll(pageable));
     }
 
     @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
-        post.setId(nextId.getAndIncrement());
-        posts.add(post);
+        this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -47,17 +50,13 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-       Optional<Post> post = posts.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
+       Optional<Post> post = this.postRepository.findById(id);
        return ResponseEntity.of(post);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data) {
-        Optional<Post> maybePost = posts.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
+        Optional<Post> maybePost = this.postRepository.findById(id);
         if (maybePost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -65,15 +64,17 @@ public class PostController {
         post.setAuthor(data.getAuthor());
         post.setTitle(data.getTitle());
         post.setContent(data.getContent());
-        return ResponseEntity.ok(data);
+        post.setPublished(data.isPublished());
+        this.postRepository.save(post);
+        return ResponseEntity.ok(post);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> destroy(@PathVariable Long id) {
-        boolean removed = posts.removeIf(p -> p.getId().equals(id));
-        if (!removed) {
+        if (!this.postRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        this.postRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

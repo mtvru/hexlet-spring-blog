@@ -3,6 +3,8 @@ app:
   admin-email: "admin@admin.com"
 
 logging:
+  level:
+    io.hexlet.blog: DEBUG
   pattern:
     dateformat: "yyyy-MM-dd HH:mm:ss"
 
