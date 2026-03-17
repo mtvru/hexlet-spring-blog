@@ -1,7 +1,7 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.model.User;
 import jakarta.validation.Valid;
-import io.hexlet.blog.model.Post;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,56 +21,55 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping("/api/posts")
-public class PostController {
-    private final List<Post> posts = new CopyOnWriteArrayList<>();
+@RequestMapping("/api/users")
+public class UserController {
+    private final List<User> users = new CopyOnWriteArrayList<>();
     private final AtomicLong nextId = new AtomicLong(1);
 
     @GetMapping
-    public ResponseEntity<List<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        List<Post> result = posts.stream().limit(limit).toList();
+    public ResponseEntity<List<User>> index(@RequestParam(defaultValue = "10") Integer limit) {
+        List<User> result = users.stream().limit(limit).toList();
         return ResponseEntity.ok(result);
     }
 
     @PostMapping
-    public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
-        post.setId(nextId.getAndIncrement());
-        posts.add(post);
+    public ResponseEntity<User> create(@Valid @RequestBody User user) {
+        user.setId(nextId.getAndIncrement());
+        users.add(user);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(post.getId())
+                .buildAndExpand(user.getId())
                 .toUri();
         return ResponseEntity.created(location)
-                .body(post);
+                .body(user);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> show(@PathVariable Long id) {
-       Optional<Post> post = posts.stream()
+    public ResponseEntity<User> show(@PathVariable Long id) {
+        Optional<User> user = users.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
-       return ResponseEntity.of(post);
+        return ResponseEntity.of(user);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data) {
-        Optional<Post> maybePost = posts.stream()
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User data) {
+        Optional<User> maybeUser = users.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
-        if (maybePost.isEmpty()) {
+        if (maybeUser.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Post post = maybePost.get();
-        post.setAuthor(data.getAuthor());
-        post.setTitle(data.getTitle());
-        post.setContent(data.getContent());
+        User user = maybeUser.get();
+        user.setName(data.getName());
+        user.setEmail(data.getEmail());
         return ResponseEntity.ok(data);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> destroy(@PathVariable Long id) {
-        boolean removed = posts.removeIf(p -> p.getId().equals(id));
+        boolean removed = users.removeIf(p -> p.getId().equals(id));
         if (!removed) {
             return ResponseEntity.notFound().build();
         }
