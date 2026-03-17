@@ -65,7 +65,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         User user = maybeUser.get();
-        user.setName(data.getName());
+        user.setFirstName(data.getFirstName());
         user.setEmail(data.getEmail());
         return ResponseEntity.ok(data);
     }
