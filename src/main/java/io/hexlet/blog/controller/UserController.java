@@ -44,7 +44,7 @@ public class UserController {
                 .path("/{id}")
                 .buildAndExpand(user.getId())
                 .toUri();
-        return ResponseEntity.created(location)
+        return ResponseEntity.created(location)         //higher priority than @ResponseStatus(HttpStatus.CREATED)
                 .body(user);
     }
 
