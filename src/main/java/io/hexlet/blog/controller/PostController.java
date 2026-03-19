@@ -1,5 +1,6 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.repository.PostRepository;
 import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
@@ -50,9 +51,10 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Post> show(@PathVariable Long id) {
-       Optional<Post> post = this.postRepository.findById(id);
-       return ResponseEntity.of(post);
+    public Post show(@PathVariable Long id) {
+       Post post = this.postRepository.findById(id)
+           .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));;
+       return post;
     }
 
     @PutMapping("/{id}")
