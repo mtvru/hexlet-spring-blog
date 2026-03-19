@@ -18,14 +18,13 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = {"id"})
 @NoArgsConstructor
 @Setter
 @Getter
 public class Post {
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
     @Column(nullable = false)
     @NotBlank(message = "Title cannot be empty")
