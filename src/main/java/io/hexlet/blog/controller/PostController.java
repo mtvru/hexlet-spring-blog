@@ -38,7 +38,8 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
-        this.postRepository.save(post);
+        post.setId(null);
+        post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

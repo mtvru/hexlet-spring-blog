@@ -40,7 +40,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        this.userRepository.save(user);
+        user.setId(null);
+        user = this.userRepository.save(user);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
