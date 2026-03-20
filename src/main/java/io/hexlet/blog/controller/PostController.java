@@ -7,6 +7,7 @@ import io.hexlet.blog.model.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,9 +33,12 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Post>> index(@RequestParam(defaultValue = "10") Integer limit) {
-        Pageable pageable = PageRequest.ofSize(limit);
-        return ResponseEntity.ok(this.postRepository.findAll(pageable));
+    public ResponseEntity<Page<Post>> index(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(this.postRepository.findByPublishedTrue(pageable));
     }
 
     @PostMapping
