@@ -3,6 +3,8 @@ package io.hexlet.blog.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
@@ -45,8 +47,28 @@ public class UsersControllerTest {
     }
 
     @Test
+    public void testCreate() throws Exception {
+        final String email = "john@example.com";
+        User user = Instancio.of(User.class)
+                .supply(Select.field(User::getEmail), () -> email)
+                .create();
+        MockHttpServletRequestBuilder request = post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(user));
+        MvcResult result = mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.email").value(email))
+                .andReturn();
+        String body = result.getResponse().getContentAsString();
+        System.out.println("Compare response testCreate: ");
+        System.out.println(om.writeValueAsString(user));
+        System.out.println(body);
+    }
+
+    @Test
     public void testUpdate() throws Exception {
-        var user = Instancio.of(User.class)
+        User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
