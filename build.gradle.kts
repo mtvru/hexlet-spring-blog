@@ -1,5 +1,7 @@
 plugins {
     java
+    id("jacoco")
+    id("org.sonarqube") version "7.2.2.6593"
     id("org.springframework.boot") version "3.5.11"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -23,6 +25,20 @@ repositories {
     mavenCentral()
 }
 
+sonar {
+    properties {
+        property("sonar.projectKey", "mtvru_hexlet-spring-blog")
+        property("sonar.organization", "mtvru")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.token", System.getenv("SONAR_TOKEN"))
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -39,6 +55,15 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
+    }
 }
 
 tasks.withType<Test> {
