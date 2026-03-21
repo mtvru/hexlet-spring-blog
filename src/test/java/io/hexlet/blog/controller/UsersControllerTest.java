@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -39,7 +40,31 @@ public class UsersControllerTest {
 
     @Test
     public void testIndex() throws Exception {
+        User user = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+        userRepository.save(user);
+        User user2 = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+        userRepository.save(user2);
         MvcResult result = this.mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String body = result.getResponse().getContentAsString();
+        assertThatJson(body);
+    }
+
+    @Test
+    public void testShow() throws Exception {
+        User user = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+        user = userRepository.save(user);
+        MvcResult result = this.mockMvc.perform(get("/api/users/" + user.getId()))
                 .andExpect(status().isOk())
                 .andReturn();
         String body = result.getResponse().getContentAsString();
@@ -87,5 +112,20 @@ public class UsersControllerTest {
 
         user = userRepository.findById(user.getId()).get();
         assertThat(user.getFirstName()).isEqualTo(("Mike"));
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        User user = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+        userRepository.save(user);
+        MockHttpServletRequestBuilder request = delete("/api/users/" + user.getId())
+                .contentType(MediaType.APPLICATION_JSON);
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent());
+        boolean deleted = userRepository.findById(user.getId()).isEmpty();
+        assertThat(deleted).isEqualTo(true);
     }
 }
