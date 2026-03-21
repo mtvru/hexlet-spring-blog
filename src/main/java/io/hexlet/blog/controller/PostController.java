@@ -1,5 +1,7 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.component.PostMapper;
+import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.repository.PostRepository;
 import jakarta.validation.Valid;
@@ -27,22 +29,26 @@ import java.util.Optional;
 @RequestMapping("/api/posts")
 public class PostController {
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
-    public PostController(PostRepository postRepository) {
+    public PostController(PostRepository postRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     @GetMapping
-    public ResponseEntity<Page<Post>> index(
+    public ResponseEntity<Page<PostDTO>> index(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-        return ResponseEntity.ok(this.postRepository.findByPublishedTrue(pageable));
+        Page<Post> posts = this.postRepository.findByPublishedTrue(pageable);
+        Page<PostDTO> dtoPage = posts.map(this.postMapper::toDTO);
+        return ResponseEntity.ok(dtoPage);
     }
 
     @PostMapping
-    public ResponseEntity<Post> create(@Valid @RequestBody Post post) {
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody Post post) {
         post.setId(null);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
@@ -51,18 +57,19 @@ public class PostController {
                 .buildAndExpand(post.getId())
                 .toUri();
         return ResponseEntity.created(location)
-                .body(post);
+                .body(this.postMapper.toDTO(post));
     }
 
     @GetMapping("/{id}")
-    public Post show(@PathVariable Long id) {
-       Post post = this.postRepository.findById(id)
+    public PostDTO show(@PathVariable Long id) {
+        PostDTO post = this.postRepository.findById(id)
+           .map(this.postMapper::toDTO)
            .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));;
        return post;
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @Valid @RequestBody Post data) {
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody Post data) {
         Optional<Post> maybePost = this.postRepository.findById(id);
         if (maybePost.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -73,7 +80,7 @@ public class PostController {
         post.setContent(data.getContent());
         post.setPublished(data.isPublished());
         this.postRepository.save(post);
-        return ResponseEntity.ok(post);
+        return ResponseEntity.ok(this.postMapper.toDTO(post));
     }
 
     @DeleteMapping("/{id}")
