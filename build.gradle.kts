@@ -47,6 +47,7 @@ dependencies {
     implementation("net.datafaker:datafaker:2.0.1")
     implementation("org.instancio:instancio-junit:3.3.0")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")

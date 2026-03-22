@@ -1,5 +1,6 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.dto.PostPatchDTO;
 import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -73,6 +75,15 @@ public class PostController {
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = this.postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
+        this.postMapper.update(dto, post);
+        this.postRepository.save(post);
+        return ResponseEntity.ok(this.postMapper.map(post));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<PostDTO> patchPost(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         this.postMapper.update(dto, post);
         this.postRepository.save(post);
         return ResponseEntity.ok(this.postMapper.map(post));
