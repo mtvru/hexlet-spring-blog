@@ -1,6 +1,5 @@
 package io.hexlet.blog.model;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -35,11 +34,9 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
     @Column(nullable = false)
-    @NotBlank(message = "Title cannot be empty")
     private String title;
     @Lob
     @Column(nullable = false)
-    @NotBlank
     private String content;
     private String author;
     private boolean published;

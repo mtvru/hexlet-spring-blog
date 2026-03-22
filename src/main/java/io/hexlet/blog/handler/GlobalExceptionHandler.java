@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error ->
             validationErrors.put(error.getField(), error.getDefaultMessage())
         );
-        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, "Validation failed", validationErrors);
+        return buildErrorResponse(ex, HttpStatus.UNPROCESSABLE_ENTITY, "Validation failed", validationErrors);
     }
 
     @Override

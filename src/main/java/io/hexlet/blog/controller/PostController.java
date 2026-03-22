@@ -1,6 +1,7 @@
 package io.hexlet.blog.controller;
 
 import io.hexlet.blog.component.PostMapper;
+import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.repository.PostRepository;
@@ -48,8 +49,11 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> create(@Valid @RequestBody Post post) {
-        post.setId(null);
+    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
+        Post post = new Post();
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        post.setPublished(true);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -64,7 +68,7 @@ public class PostController {
     public PostDTO show(@PathVariable Long id) {
         PostDTO post = this.postRepository.findById(id)
            .map(this.postMapper::toDTO)
-           .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));;
+           .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
        return post;
     }
 
