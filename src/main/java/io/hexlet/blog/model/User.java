@@ -2,7 +2,6 @@ package io.hexlet.blog.model;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -36,7 +35,6 @@ public class User {
     private String lastName;
     private LocalDate birthday;
     @Column(name = "email", unique = true, nullable = false, length = 200)
-    @NotBlank
     private String email;
     @LastModifiedDate
     private LocalDateTime updatedAt;
