@@ -1,6 +1,6 @@
 package io.hexlet.blog.controller;
 
-import io.hexlet.blog.component.PostMapper;
+import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -45,13 +44,13 @@ public class PostController {
     ) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Post> posts = this.postRepository.findByPublishedTrue(pageable);
-        Page<PostDTO> dtoPage = posts.map(this.postMapper::toDTO);
+        Page<PostDTO> dtoPage = posts.map(this.postMapper::map);
         return ResponseEntity.ok(dtoPage);
     }
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
-        Post post = this.postMapper.toEntity(dto);
+        Post post = this.postMapper.map(dto);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -59,13 +58,13 @@ public class PostController {
                 .buildAndExpand(post.getId())
                 .toUri();
         return ResponseEntity.created(location)
-                .body(this.postMapper.toDTO(post));
+                .body(this.postMapper.map(post));
     }
 
     @GetMapping("/{id}")
     public PostDTO show(@PathVariable Long id) {
         PostDTO post = this.postRepository.findById(id)
-           .map(this.postMapper::toDTO)
+           .map(this.postMapper::map)
            .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
        return post;
     }
@@ -74,9 +73,9 @@ public class PostController {
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = this.postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
-        post = this.postMapper.toEntity(post, dto);
+        this.postMapper.update(dto, post);
         this.postRepository.save(post);
-        return ResponseEntity.ok(this.postMapper.toDTO(post));
+        return ResponseEntity.ok(this.postMapper.map(post));
     }
 
     @DeleteMapping("/{id}")

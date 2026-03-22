@@ -1,4 +1,4 @@
-package io.hexlet.blog.component;
+package io.hexlet.blog.mapper;
 
 import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.model.User;
