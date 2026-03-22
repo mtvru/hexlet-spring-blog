@@ -74,7 +74,7 @@ public class PostController {
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = this.postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
-        this.postMapper.updateEntity(post, dto);
+        post = this.postMapper.updateEntity(post, dto);
         this.postRepository.save(post);
         return ResponseEntity.ok(this.postMapper.toDTO(post));
     }
