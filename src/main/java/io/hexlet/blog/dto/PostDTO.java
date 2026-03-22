@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
 @Getter
 public class PostDTO {
     private Long id;
+    private Long authorId;
     private String title;
     private String content;
     private boolean published;
+    private String slug;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long userId;
 }

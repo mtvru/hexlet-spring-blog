@@ -31,10 +31,10 @@ public class ModelGenerator {
             userRepository.save(user);
 
             Post post = new Post();
-            post.setTitle(faker.book().title());
+            post.setName(faker.book().title());
             post.setContent(faker.lorem().paragraph());
             post.setPublished(faker.bool().bool());
-            post.setUser(user);
+            post.setAuthor(user);
             postRepository.save(post);
         }
     }

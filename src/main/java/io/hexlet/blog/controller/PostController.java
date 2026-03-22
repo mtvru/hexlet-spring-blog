@@ -6,7 +6,9 @@ import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
+import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.PostRepository;
+import io.hexlet.blog.repository.UserRepository;
 import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
 import org.springframework.data.domain.Page;
@@ -33,10 +35,12 @@ import java.net.URI;
 public class PostController {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final UserRepository userRepository;
 
-    public PostController(PostRepository postRepository, PostMapper postMapper) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -52,7 +56,10 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
+        User user = this.userRepository.findById(dto.getAuthorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Author with id " + dto.getAuthorId() + " not found"));
         Post post = this.postMapper.map(dto);
+        post.setAuthor(user);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

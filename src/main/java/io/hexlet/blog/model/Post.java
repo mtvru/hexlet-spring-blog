@@ -30,13 +30,13 @@ public class Post {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private User author;
+    @Column(unique = true)
+    private String slug;
     @Column(nullable = false)
-    private String title;
+    private String name;
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
-    private String author;
     private boolean published;
     @LastModifiedDate
     private LocalDateTime updatedAt;
