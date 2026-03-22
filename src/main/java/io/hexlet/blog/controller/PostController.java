@@ -56,10 +56,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
-        User user = this.userRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Author with id " + dto.getAuthorId() + " not found"));
         Post post = this.postMapper.map(dto);
-        post.setAuthor(user);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

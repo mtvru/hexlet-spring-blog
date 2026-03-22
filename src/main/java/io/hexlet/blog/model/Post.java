@@ -25,7 +25,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Setter
 @Getter
-public class Post {
+public class Post implements BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
