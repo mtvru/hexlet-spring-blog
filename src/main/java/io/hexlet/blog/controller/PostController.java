@@ -3,6 +3,7 @@ package io.hexlet.blog.controller;
 import io.hexlet.blog.component.PostMapper;
 import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
+import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.repository.PostRepository;
 import jakarta.validation.Valid;
@@ -50,10 +51,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
-        Post post = new Post();
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setPublished(true);
+        Post post = this.postMapper.toEntity(dto);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -73,16 +71,10 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody Post data) {
-        Optional<Post> maybePost = this.postRepository.findById(id);
-        if (maybePost.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Post post = maybePost.get();
-        post.setAuthor(data.getAuthor());
-        post.setTitle(data.getTitle());
-        post.setContent(data.getContent());
-        post.setPublished(data.isPublished());
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
+        Post post = this.postRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
+        this.postMapper.updateEntity(post, dto);
         this.postRepository.save(post);
         return ResponseEntity.ok(this.postMapper.toDTO(post));
     }
