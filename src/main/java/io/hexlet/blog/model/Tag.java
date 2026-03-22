@@ -8,10 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,39 +29,17 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @NoArgsConstructor
 @Setter
 @Getter
-public class Post implements BaseEntity {
+public class Tag implements BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-    @ManyToOne
-    private User author;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-//    @JoinTable(
-//        name = "post_tags",
-//        joinColumns = @JoinColumn(name = "post_id"),
-//        inverseJoinColumns = @JoinColumn(name = "tag_id")
-//    )
-    private Set<Tag> tags = new HashSet<>();
-    @Column(unique = true)
-    private String slug;
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Post> posts = new HashSet<>();
     @Column(nullable = false)
     private String name;
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
-    private boolean published;
     @LastModifiedDate
     private LocalDateTime updatedAt;
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public void addTag(Tag tag) {
-        this.tags.add(tag);
-        tag.getPosts().add(this);
-    }
-
-    public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        tag.getPosts().remove(this);
-    }
 }

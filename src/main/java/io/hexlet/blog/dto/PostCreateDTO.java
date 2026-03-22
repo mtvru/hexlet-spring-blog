@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Setter
 @Getter
 public class PostCreateDTO {
@@ -19,4 +21,6 @@ public class PostCreateDTO {
 
     @NotNull
     private Long authorId;
+
+    private Set<Long> tagIds;
 }

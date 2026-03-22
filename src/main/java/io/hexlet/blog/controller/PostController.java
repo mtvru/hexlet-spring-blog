@@ -35,12 +35,10 @@ import java.net.URI;
 public class PostController {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
-    private final UserRepository userRepository;
 
-    public PostController(PostRepository postRepository, PostMapper postMapper, UserRepository userRepository) {
+    public PostController(PostRepository postRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
-        this.userRepository = userRepository;
     }
 
     @GetMapping

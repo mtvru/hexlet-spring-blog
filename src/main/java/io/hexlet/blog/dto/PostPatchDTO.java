@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import java.util.Set;
+
 @Setter
 @Getter
 public class PostPatchDTO {
@@ -18,4 +20,6 @@ public class PostPatchDTO {
     private JsonNullable<String> content = JsonNullable.undefined();
 
     private JsonNullable<Boolean> published = JsonNullable.undefined();
+
+    private JsonNullable<Set<Long>> tagIds = JsonNullable.undefined();
 }
