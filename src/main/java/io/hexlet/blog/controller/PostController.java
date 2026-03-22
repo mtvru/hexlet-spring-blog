@@ -66,14 +66,14 @@ public class PostController {
     public PostDTO show(@PathVariable Long id) {
         PostDTO post = this.postRepository.findById(id)
            .map(this.postMapper::toDTO)
-           .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
+           .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
        return post;
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
         Post post = this.postRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         post = this.postMapper.updateEntity(post, dto);
         this.postRepository.save(post);
         return ResponseEntity.ok(this.postMapper.toDTO(post));
