@@ -28,7 +28,7 @@ public class PostMapper {
         return post;
     }
 
-    public Post updateEntity(Post post, PostUpdateDTO dto) {
+    public Post toEntity(Post post, PostUpdateDTO dto) {
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
         return post;
