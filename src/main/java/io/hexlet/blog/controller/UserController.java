@@ -1,9 +1,13 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.dto.UserCreateDTO;
+import io.hexlet.blog.dto.UserDTO;
+import io.hexlet.blog.dto.UserUpdateDTO;
+import io.hexlet.blog.exception.ResourceNotFoundException;
+import io.hexlet.blog.mapper.UserMapper;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.UserRepository;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,24 +27,29 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    public UserController(UserRepository userRepository,  UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
 
     @GetMapping
-    public ResponseEntity<Page<User>> index(@RequestParam(defaultValue = "10") Integer limit) {
+    public ResponseEntity<Page<UserDTO>> index(@RequestParam(defaultValue = "10") Integer limit) {
         Pageable pageable = PageRequest.of(0, limit, Sort.by("createdAt").descending());
-        return ResponseEntity.ok(this.userRepository.findAll(pageable));
+        Page<User> users = this.userRepository.findAll(pageable);
+        return ResponseEntity.ok(users.map(this.userMapper::map));
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        user.setId(null);
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserCreateDTO dto) {
+        User user = this.userMapper.map(dto);
         user = this.userRepository.save(user);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -48,28 +57,23 @@ public class UserController {
                 .buildAndExpand(user.getId())
                 .toUri();
         return ResponseEntity.created(location)         //higher priority than @ResponseStatus(HttpStatus.CREATED)
-                .body(user);
+                .body(this.userMapper.map(user));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> show(@PathVariable Long id) {
-        Optional<User> user = this.userRepository.findById(id);
-        return ResponseEntity.of(user);
+    public ResponseEntity<UserDTO> show(@PathVariable Long id) {
+        User user = this.userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        return ResponseEntity.ok(this.userMapper.map(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User data) {
-        Optional<User> maybeUser = this.userRepository.findById(id);
-        if (maybeUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        User user = maybeUser.get();
-        user.setFirstName(data.getFirstName());
-        user.setLastName(data.getLastName());
-        user.setBirthday(data.getBirthday());
-        user.setEmail(data.getEmail());
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
+        User user = this.userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+        this.userMapper.update(dto, user);
         this.userRepository.save(user);
-        return ResponseEntity.ok(data);
+        return ResponseEntity.ok(this.userMapper.map(user));
     }
 
     @DeleteMapping("/{id}")
