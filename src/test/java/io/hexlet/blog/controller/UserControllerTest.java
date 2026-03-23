@@ -42,11 +42,13 @@ public class UserControllerTest {
     public void testIndex() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
         User user2 = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user2);
@@ -61,6 +63,7 @@ public class UserControllerTest {
     public void testShow() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         user = userRepository.save(user);
@@ -75,6 +78,7 @@ public class UserControllerTest {
     public void testCreate() throws Exception {
         final String email = "john@example.com";
         User user = Instancio.of(User.class)
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> email)
                 .create();
         MockHttpServletRequestBuilder request = post("/api/users")
@@ -95,6 +99,7 @@ public class UserControllerTest {
     public void testUpdate() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
@@ -118,6 +123,7 @@ public class UserControllerTest {
     public void testDelete() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Setter
 @Getter
 public class PostUpdateDTO {
@@ -15,4 +17,6 @@ public class PostUpdateDTO {
     @NotBlank
     @Size(min = 10)
     private String content;
+
+    private Set<Long> tagIds;
 }

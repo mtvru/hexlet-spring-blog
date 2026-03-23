@@ -42,18 +42,23 @@ public class PostControllerTest {
     public void testIndex() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
+                .ignore(Select.field(Post::getAuthor))
+                .ignore(Select.field(Post::getTags))
                 .create();
-        post.setUser(user);
+        post.setAuthor(user);
         postRepository.save(post);
         Post post2 = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
+                .ignore(Select.field(Post::getAuthor))
+                .ignore(Select.field(Post::getTags))
                 .create();
-        post2.setUser(user);
+        post2.setAuthor(user);
         postRepository.save(post2);
         MvcResult result = this.mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
@@ -66,13 +71,16 @@ public class PostControllerTest {
     public void testShow() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
+                .ignore(Select.field(Post::getAuthor))
+                .ignore(Select.field(Post::getTags))
                 .create();
-        post.setUser(user);
+        post.setAuthor(user);
         post = postRepository.save(post);
         MvcResult result = this.mockMvc.perform(get("/api/posts/" + post.getId()))
                 .andExpect(status().isOk())
@@ -86,13 +94,16 @@ public class PostControllerTest {
     public void testUpdate() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
+                .ignore(Select.field(Post::getAuthor))
+                .ignore(Select.field(Post::getTags))
                 .create();
-        post.setUser(user);
+        post.setAuthor(user);
         post = postRepository.save(post);
         HashMap<String, String> data = new HashMap<>();
         data.put("title", "Mike title");
@@ -103,7 +114,7 @@ public class PostControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk());
         post = postRepository.findById(post.getId()).get();
-        assertThat(post.getTitle()).isEqualTo(("Mike title"));
+        assertThat(post.getName()).isEqualTo(("Mike title"));
         assertThat(post.getContent()).isEqualTo(("Mike content"));
     }
 
@@ -111,13 +122,16 @@ public class PostControllerTest {
     public void testDelete() throws Exception {
         User user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
+                .ignore(Select.field(User::getPosts))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
                 .ignore(Select.field(Post::getId))
+                .ignore(Select.field(Post::getAuthor))
+                .ignore(Select.field(Post::getTags))
                 .create();
-        post.setUser(user);
+        post.setAuthor(user);
         postRepository.save(post);
         MockHttpServletRequestBuilder request = delete("/api/posts/" + post.getId())
                 .contentType(MediaType.APPLICATION_JSON);
