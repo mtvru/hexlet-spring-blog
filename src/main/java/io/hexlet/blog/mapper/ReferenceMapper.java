@@ -26,8 +26,8 @@ public abstract class ReferenceMapper {
     public <T extends BaseEntity> Set<T> toEntitySet(Set<Long> ids, @TargetType Class<T> entityClass) {
         if (ids == null) return null;
         return ids.stream()
-                .map(id -> toEntity(id, entityClass))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            .map(id -> toEntity(id, entityClass))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

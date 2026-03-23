@@ -41,20 +41,20 @@ public class UserControllerTest {
     @Test
     public void testIndex() throws Exception {
         User user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
         userRepository.save(user);
         User user2 = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
         userRepository.save(user2);
         MvcResult result = this.mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andReturn();
         String body = result.getResponse().getContentAsString();
         assertThatJson(body);
     }
@@ -62,14 +62,14 @@ public class UserControllerTest {
     @Test
     public void testShow() throws Exception {
         User user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
         user = userRepository.save(user);
         MvcResult result = this.mockMvc.perform(get("/api/users/" + user.getId()))
-                .andExpect(status().isOk())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andReturn();
         String body = result.getResponse().getContentAsString();
         assertThatJson(body);
     }
@@ -78,17 +78,17 @@ public class UserControllerTest {
     public void testCreate() throws Exception {
         final String email = "john@example.com";
         User user = Instancio.of(User.class)
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> email)
-                .create();
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> email)
+            .create();
         MockHttpServletRequestBuilder request = post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(user));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(user));
         MvcResult result = mockMvc.perform(request)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.email").value(email))
-                .andReturn();
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.email").value(email))
+            .andReturn();
         String body = result.getResponse().getContentAsString();
         System.out.println("Compare response testCreate: ");
         System.out.println(om.writeValueAsString(user));
@@ -98,10 +98,10 @@ public class UserControllerTest {
     @Test
     public void testUpdate() throws Exception {
         User user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
         userRepository.save(user);
 
         HashMap<String, String> data = new HashMap<>();
@@ -109,11 +109,11 @@ public class UserControllerTest {
         data.put("email", user.getEmail());
 
         MockHttpServletRequestBuilder request = put("/api/users/" + user.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(data));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
 
         mockMvc.perform(request)
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         user = userRepository.findById(user.getId()).get();
         assertThat(user.getFirstName()).isEqualTo(("Mike"));
@@ -122,15 +122,15 @@ public class UserControllerTest {
     @Test
     public void testDelete() throws Exception {
         User user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getPosts))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
         userRepository.save(user);
         MockHttpServletRequestBuilder request = delete("/api/users/" + user.getId())
-                .contentType(MediaType.APPLICATION_JSON);
+            .contentType(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
-                .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent());
         boolean deleted = userRepository.findById(user.getId()).isEmpty();
         assertThat(deleted).isEqualTo(true);
     }

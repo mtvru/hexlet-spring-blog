@@ -36,7 +36,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserController(UserRepository userRepository,  UserMapper userMapper) {
+    public UserController(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
@@ -54,12 +54,12 @@ public class UserController {
         User user = this.userMapper.map(dto);
         user = this.userRepository.save(user);
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(user.getId())
-                .toUri();
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(user.getId())
+            .toUri();
         return ResponseEntity.created(location)         //higher priority than @ResponseStatus(HttpStatus.CREATED)
-                .body(this.userMapper.map(user));
+            .body(this.userMapper.map(user));
     }
 
     @GetMapping("/{id}")
@@ -81,7 +81,7 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<UserDTO> patchUser(@PathVariable Long id, @Valid @RequestBody UserPatchDTO dto) {
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
         this.userMapper.update(dto, user);
         userRepository.save(user);
         return ResponseEntity.ok(this.userMapper.map(user));

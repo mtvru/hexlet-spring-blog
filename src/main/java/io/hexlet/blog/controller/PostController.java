@@ -6,9 +6,7 @@ import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
-import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.PostRepository;
-import io.hexlet.blog.repository.UserRepository;
 import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
 import org.springframework.data.domain.Page;
@@ -57,20 +55,20 @@ public class PostController {
         Post post = this.postMapper.map(dto);
         post = this.postRepository.save(post);
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(post.getId())
-                .toUri();
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(post.getId())
+            .toUri();
         return ResponseEntity.created(location)
-                .body(this.postMapper.map(post));
+            .body(this.postMapper.map(post));
     }
 
     @GetMapping("/{id}")
     public PostDTO show(@PathVariable Long id) {
         PostDTO post = this.postRepository.findById(id)
-           .map(this.postMapper::map)
-           .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
-       return post;
+            .map(this.postMapper::map)
+            .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
+        return post;
     }
 
     @PutMapping("/{id}")
@@ -85,7 +83,7 @@ public class PostController {
     @PatchMapping("/{id}")
     public ResponseEntity<PostDTO> patchPost(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
         var post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         this.postMapper.update(dto, post);
         this.postRepository.save(post);
         return ResponseEntity.ok(this.postMapper.map(post));

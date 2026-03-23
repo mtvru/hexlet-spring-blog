@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByPublishedTrue(Pageable pageable);
+
     List<Post> findByTagsId(Long tagId);
 }

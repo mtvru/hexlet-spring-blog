@@ -58,20 +58,20 @@ public class TagController {
         Tag tag = this.tagMapper.map(dto);
         tag = this.tagRepository.save(tag);
         URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(tag.getId())
-                .toUri();
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(tag.getId())
+            .toUri();
         return ResponseEntity.created(location)
-                .body(this.tagMapper.map(tag));
+            .body(this.tagMapper.map(tag));
     }
 
     @GetMapping("/{id}")
     public TagDTO show(@PathVariable Long id) {
         TagDTO tag = this.tagRepository.findById(id)
-           .map(this.tagMapper::map)
-           .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
-       return tag;
+            .map(this.tagMapper::map)
+            .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
+        return tag;
     }
 
     @PutMapping("/{id}")
@@ -86,7 +86,7 @@ public class TagController {
     @PatchMapping("/{id}")
     public ResponseEntity<TagDTO> patchTag(@PathVariable Long id, @RequestBody TagPatchDTO dto) {
         var tag = tagRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
         this.tagMapper.update(dto, tag);
         this.tagRepository.save(tag);
         return ResponseEntity.ok(this.tagMapper.map(tag));
