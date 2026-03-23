@@ -18,5 +18,7 @@ public class PostUpdateDTO {
     @Size(min = 10)
     private String content;
 
+    private boolean published;
+
     private Set<Long> tagIds;
 }

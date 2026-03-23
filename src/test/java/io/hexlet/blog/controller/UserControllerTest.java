@@ -106,8 +106,9 @@ public class UserControllerTest {
             .create();
         userRepository.save(user);
 
+        String newFirstName = "Mike";
         HashMap<String, String> data = new HashMap<>();
-        data.put("firstName", "Mike");
+        data.put("firstName", newFirstName);
         data.put("email", user.getEmail());
 
         MockHttpServletRequestBuilder request = put("/api/users/" + user.getId())
@@ -118,7 +119,7 @@ public class UserControllerTest {
             .andExpect(status().isOk());
 
         User updatedUser = userRepository.findById(user.getId()).get();
-        assertThat(updatedUser.getFirstName()).isEqualTo("Mike");
+        assertThat(updatedUser.getFirstName()).isEqualTo(newFirstName);
         assertThat(updatedUser.getEmail()).isEqualTo(user.getEmail());
         assertThat(updatedUser.getLastName()).isNull();
         assertThat(updatedUser.getBirthday()).isNull();

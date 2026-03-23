@@ -2,7 +2,6 @@ package io.hexlet.blog.controller;
 
 import io.hexlet.blog.dto.TagCreateDTO;
 import io.hexlet.blog.dto.TagDTO;
-import io.hexlet.blog.dto.TagPatchDTO;
 import io.hexlet.blog.dto.TagUpdateDTO;
 import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.mapper.TagMapper;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -77,15 +75,6 @@ public class TagController {
     @PutMapping("/{id}")
     public ResponseEntity<TagDTO> update(@PathVariable Long id, @Valid @RequestBody TagUpdateDTO dto) {
         Tag tag = this.tagRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
-        this.tagMapper.update(dto, tag);
-        this.tagRepository.save(tag);
-        return ResponseEntity.ok(this.tagMapper.map(tag));
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<TagDTO> patch(@PathVariable Long id, @RequestBody TagPatchDTO dto) {
-        var tag = tagRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
         this.tagMapper.update(dto, tag);
         this.tagRepository.save(tag);

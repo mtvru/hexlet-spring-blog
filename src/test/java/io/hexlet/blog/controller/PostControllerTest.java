@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,44 +96,8 @@ public class PostControllerTest {
         assertThatJson(body);
     }
 
-
     @Test
-    public void testUpdate() throws Exception {
-        User user = Instancio.of(User.class)
-            .ignore(Select.field(User::getId))
-            .ignore(Select.field(User::getPosts))
-            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-            .create();
-        userRepository.save(user);
-        Post post = Instancio.of(Post.class)
-            .ignore(Select.field(Post::getId))
-            .ignore(Select.field(Post::getAuthor))
-            .ignore(Select.field(Post::getTags))
-            .create();
-        post.setAuthor(user);
-        post = postRepository.save(post);
-        Tag tag = Instancio.of(Tag.class)
-            .ignore(Select.field(Tag::getId))
-            .ignore(Select.field(Tag::getPosts))
-            .create();
-        tagRepository.save(tag);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("title", "Mike title");
-        data.put("content", "Mike content");
-        data.put("tagIds", List.of(tag.getId()));
-
-        MockHttpServletRequestBuilder request = put("/api/posts/" + post.getId())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(om.writeValueAsString(data));
-        mockMvc.perform(request)
-            .andExpect(status().isOk());
-        post = postRepository.findById(post.getId()).get();
-        assertThat(post.getName()).isEqualTo(("Mike title"));
-        assertThat(post.getContent()).isEqualTo(("Mike content"));
-    }
-
-    @Test
+    @Transactional
     public void testCreate() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
@@ -146,11 +111,11 @@ public class PostControllerTest {
             .create();
         tagRepository.save(tag);
 
-        var data = new java.util.HashMap<String, Object>();
+        HashMap<String, Object> data = new HashMap<>();
         data.put("title", "New Mike Title");
         data.put("content", "New Mike Content that is long enough");
         data.put("authorId", user.getId());
-        data.put("tagIds", java.util.List.of(tag.getId()));
+        data.put("tagIds", List.of(tag.getId()));
 
         MockHttpServletRequestBuilder request = post("/api/posts")
             .contentType(MediaType.APPLICATION_JSON)
@@ -166,6 +131,85 @@ public class PostControllerTest {
 
         assertThat(post.getContent()).isEqualTo("New Mike Content that is long enough");
         assertThat(post.getAuthor().getId()).isEqualTo(user.getId());
+        assertThat(post.getTags()).containsExactly(tag);
+    }
+
+    @Test
+    @Transactional
+    public void testUpdate() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+        final boolean published = true;
+        Post post = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .supply(Select.field(Post::isPublished), () -> published)
+            .create();
+        post.setAuthor(user);
+        post = postRepository.save(post);
+        Tag tag = Instancio.of(Tag.class)
+            .ignore(Select.field(Tag::getId))
+            .ignore(Select.field(Tag::getPosts))
+            .create();
+        tagRepository.save(tag);
+
+        Map<String, Object> data = new HashMap<>();
+        String newTitle = "Mike title";
+        String newContent = "Mike content";
+        data.put("title", newTitle);
+        data.put("content", newContent);
+        data.put("tagIds", List.of(tag.getId()));
+
+        MockHttpServletRequestBuilder request = put("/api/posts/" + post.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+        mockMvc.perform(request)
+            .andExpect(status().isOk());
+        Post updatedPost = postRepository.findById(post.getId()).get();
+        assertThat(updatedPost.getName()).isEqualTo(newTitle);
+        assertThat(updatedPost.getContent()).isEqualTo(newContent);
+        assertThat(updatedPost.getTags()).containsExactly(tag);
+        assertThat(updatedPost.isPublished()).isFalse();
+    }
+
+    @Test
+    @Transactional
+    public void testPatch() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+        final boolean published = true;
+        Post post = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .supply(Select.field(Post::isPublished), () -> published)
+            .create();
+        post.setAuthor(user);
+        post = postRepository.save(post);
+
+        String newTitle = "Mike patch title";
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", newTitle);
+
+        MockHttpServletRequestBuilder request = patch("/api/posts/" + post.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+        mockMvc.perform(request)
+            .andExpect(status().isOk());
+        Post patchedPost = postRepository.findById(post.getId()).get();
+        assertThat(patchedPost.getName()).isEqualTo(newTitle);
+        assertThat(patchedPost.getContent()).isEqualTo(post.getContent());
+        assertThat(patchedPost.isPublished()).isEqualTo(published);
+        assertThat(patchedPost.getTags()).isEmpty();
     }
 
     @Test
