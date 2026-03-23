@@ -81,7 +81,7 @@ public class PostController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostDTO> patchPost(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
+    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
         var post = postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         this.postMapper.update(dto, post);

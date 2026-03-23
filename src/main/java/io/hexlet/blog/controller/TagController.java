@@ -84,7 +84,7 @@ public class TagController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<TagDTO> patchTag(@PathVariable Long id, @RequestBody TagPatchDTO dto) {
+    public ResponseEntity<TagDTO> patch(@PathVariable Long id, @RequestBody TagPatchDTO dto) {
         var tag = tagRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Tag with id " + id + " not found"));
         this.tagMapper.update(dto, tag);

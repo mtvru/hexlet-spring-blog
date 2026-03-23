@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> patchUser(@PathVariable Long id, @Valid @RequestBody UserPatchDTO dto) {
+    public ResponseEntity<UserDTO> patch(@PathVariable Long id, @Valid @RequestBody UserPatchDTO dto) {
         var user = userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
         this.userMapper.update(dto, user);
