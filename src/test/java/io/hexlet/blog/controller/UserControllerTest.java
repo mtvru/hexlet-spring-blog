@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 
 @SpringBootTest
@@ -115,8 +117,43 @@ public class UserControllerTest {
         mockMvc.perform(request)
             .andExpect(status().isOk());
 
-        user = userRepository.findById(user.getId()).get();
-        assertThat(user.getFirstName()).isEqualTo(("Mike"));
+        User updatedUser = userRepository.findById(user.getId()).get();
+        assertThat(updatedUser.getFirstName()).isEqualTo("Mike");
+        assertThat(updatedUser.getEmail()).isEqualTo(user.getEmail());
+        assertThat(updatedUser.getLastName()).isNull();
+        assertThat(updatedUser.getBirthday()).isNull();
+    }
+
+    @Test
+    public void testPatch() throws Exception {
+        final String email = faker.internet().emailAddress();
+        final String lastName = faker.name().lastName();
+        final LocalDate birthday = faker.date().birthday().toLocalDateTime().toLocalDate();
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getLastName), () -> lastName)
+            .supply(Select.field(User::getEmail), () -> email)
+            .supply(Select.field(User::getBirthday), () -> birthday)
+            .create();
+        userRepository.save(user);
+
+        HashMap<String, String> data = new HashMap<>();
+        String firstName = "Mike patch";
+        data.put("firstName", firstName);
+
+        MockHttpServletRequestBuilder request = patch("/api/users/{id}", user.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk());
+
+        User patchedUser = userRepository.findById(user.getId()).get();
+        assertThat(patchedUser.getFirstName()).isEqualTo(firstName);
+        assertThat(patchedUser.getLastName()).isEqualTo(lastName);
+        assertThat(patchedUser.getBirthday()).isEqualTo(birthday);
+        assertThat(patchedUser.getEmail()).isEqualTo(email);
     }
 
     @Test
