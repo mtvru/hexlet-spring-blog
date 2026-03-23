@@ -65,10 +65,9 @@ public class PostController {
 
     @GetMapping("/{id}")
     public PostDTO show(@PathVariable Long id) {
-        PostDTO post = this.postRepository.findById(id)
+        return this.postRepository.findById(id)
             .map(this.postMapper::map)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
-        return post;
     }
 
     @PutMapping("/{id}")

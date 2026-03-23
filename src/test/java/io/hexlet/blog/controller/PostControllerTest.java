@@ -1,6 +1,8 @@
 package io.hexlet.blog.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.model.Tag;
@@ -23,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +48,7 @@ public class PostControllerTest {
     private ObjectMapper om;
 
     @Test
+    @Transactional
     public void testIndex() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
@@ -53,28 +56,42 @@ public class PostControllerTest {
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
             .create();
         userRepository.save(user);
+        Tag tag = Instancio.of(Tag.class)
+            .ignore(Select.field(Tag::getId))
+            .ignore(Select.field(Tag::getPosts))
+            .create();
+        tagRepository.save(tag);
         Post post = Instancio.of(Post.class)
             .ignore(Select.field(Post::getId))
             .ignore(Select.field(Post::getAuthor))
             .ignore(Select.field(Post::getTags))
+            .supply(Select.field(Post::isPublished), () -> true)
             .create();
+
         post.setAuthor(user);
+        post.addTag(tag);
         postRepository.save(post);
-        Post post2 = Instancio.of(Post.class)
-            .ignore(Select.field(Post::getId))
-            .ignore(Select.field(Post::getAuthor))
-            .ignore(Select.field(Post::getTags))
-            .create();
-        post2.setAuthor(user);
-        postRepository.save(post2);
+
         MvcResult result = this.mockMvc.perform(get("/api/posts"))
             .andExpect(status().isOk())
             .andReturn();
+
         String body = result.getResponse().getContentAsString();
-        assertThatJson(body);
+        Map<String, Object> responsePage = om.readValue(body, new TypeReference<>() {});
+        List<PostDTO> posts = om.convertValue(responsePage.get("content"), new TypeReference<>() {
+        });
+        assertThat(posts).anySatisfy(postDto -> {
+            assertThat(postDto.getAuthorId()).isEqualTo(user.getId());
+            assertThat(postDto.getTitle()).isEqualTo(post.getName());
+            assertThat(postDto.getTags()).anySatisfy(tagDto -> {
+                assertThat(tagDto.getName()).isEqualTo(tag.getName());
+                assertThat(tagDto.getId()).isEqualTo(tag.getId());
+            });
+        });
     }
 
     @Test
+    @Transactional
     public void testShow() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
@@ -82,18 +99,31 @@ public class PostControllerTest {
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
             .create();
         userRepository.save(user);
+        Tag tag = Instancio.of(Tag.class)
+            .ignore(Select.field(Tag::getId))
+            .ignore(Select.field(Tag::getPosts))
+            .create();
+        tagRepository.save(tag);
         Post post = Instancio.of(Post.class)
             .ignore(Select.field(Post::getId))
             .ignore(Select.field(Post::getAuthor))
             .ignore(Select.field(Post::getTags))
             .create();
         post.setAuthor(user);
-        post = postRepository.save(post);
+        post.addTag(tag);
+        postRepository.save(post);
         MvcResult result = this.mockMvc.perform(get("/api/posts/" + post.getId()))
             .andExpect(status().isOk())
             .andReturn();
         String body = result.getResponse().getContentAsString();
-        assertThatJson(body);
+        PostDTO resultPost = om.readValue(body, PostDTO.class);
+        assertThat(resultPost.getTitle()).isEqualTo(post.getName());
+        assertThat(resultPost.getContent()).isEqualTo(post.getContent());
+        assertThat(resultPost.getAuthorId()).isEqualTo(user.getId());
+        assertThat(resultPost.getTags()).anySatisfy(tagDto -> {
+            assertThat(tagDto.getName()).isEqualTo(tag.getName());
+            assertThat(tagDto.getId()).isEqualTo(tag.getId());
+        });
     }
 
     @Test
