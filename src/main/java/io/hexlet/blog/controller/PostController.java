@@ -1,18 +1,21 @@
 package io.hexlet.blog.controller;
 
 import io.hexlet.blog.dto.PostPatchDTO;
-import io.hexlet.blog.mapper.PostMapper;
+import io.hexlet.blog.dto.PostParamsDTO;
 import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
+import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.exception.ResourceNotFoundException;
 import io.hexlet.blog.repository.PostRepository;
+import io.hexlet.blog.specification.PostSpecification;
 import jakarta.validation.Valid;
 import io.hexlet.blog.model.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,10 +36,12 @@ import java.net.URI;
 public class PostController {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final PostSpecification specBuilder;
 
-    public PostController(PostRepository postRepository, PostMapper postMapper) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, PostSpecification specBuilder) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.specBuilder = specBuilder;
     }
 
     @GetMapping
@@ -48,6 +53,13 @@ public class PostController {
         Page<Post> posts = this.postRepository.findByPublishedTrue(pageable);
         Page<PostDTO> dtoPage = posts.map(this.postMapper::map);
         return ResponseEntity.ok(dtoPage);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<PostDTO>> filter(PostParamsDTO params, @RequestParam(defaultValue = "1") int page) {
+        Specification<Post> spec = specBuilder.build(params);
+        Page<Post> posts = this.postRepository.findAll(spec, PageRequest.of(page - 1, 10));
+        return ResponseEntity.ok(posts.map(postMapper::map));
     }
 
     @PostMapping
