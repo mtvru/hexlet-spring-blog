@@ -71,7 +71,7 @@ public class PostController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
+    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @Valid @RequestBody PostPatchDTO dto) {
         PostDTO post = this.postService.update(id, dto);
         return ResponseEntity.ok(post);
     }

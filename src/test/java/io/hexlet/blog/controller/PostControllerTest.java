@@ -317,4 +317,105 @@ public class PostControllerTest {
         assertThat(posts2).hasSize(1);
         assertThat(posts2.getFirst().getTitle()).isEqualTo(post2.getName());
     }
+
+    @Test
+    public void testCreateWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+
+        // Blank title
+        Map<String, Object> data1 = new HashMap<>();
+        data1.put("title", "");
+        data1.put("content", "Valid content that is long enough");
+        data1.put("authorId", user.getId());
+        mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data1)))
+            .andExpect(status().isUnprocessableEntity());
+
+        // Title too short
+        Map<String, Object> data2 = new HashMap<>();
+        data2.put("title", "ab");
+        data2.put("content", "Valid content that is long enough");
+        data2.put("authorId", user.getId());
+        mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data2)))
+            .andExpect(status().isUnprocessableEntity());
+
+        // Content too short
+        Map<String, Object> data3 = new HashMap<>();
+        data3.put("title", "Valid Title");
+        data3.put("content", "short");
+        data3.put("authorId", user.getId());
+        mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data3)))
+            .andExpect(status().isUnprocessableEntity());
+
+        // Missing authorId
+        Map<String, Object> data4 = new HashMap<>();
+        data4.put("title", "Valid Title");
+        data4.put("content", "Valid content that is long enough");
+        mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data4)))
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testUpdateWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+        Post post = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .create();
+        post.setAuthor(user);
+        postRepository.save(post);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", ""); // Invalid title
+        data.put("content", "Still valid content");
+
+        mockMvc.perform(put("/api/posts/" + post.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data)))
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testPatchWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+        Post post = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .create();
+        post.setAuthor(user);
+        postRepository.save(post);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", ""); // Invalid title
+        data.put("content", "Still valid content");
+
+        mockMvc.perform(patch("/api/posts/" + post.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data)))
+            .andExpect(status().isUnprocessableEntity());
+    }
 }

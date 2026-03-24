@@ -110,4 +110,40 @@ public class TagControllerTest {
             .andExpect(status().isNoContent());
         assertThat(tagRepository.findById(tag.getId())).isEmpty();
     }
+
+    @Test
+    public void testCreateWithInvalidData() throws Exception {
+        // Blank name
+        HashMap<String, String> data1 = new HashMap<>();
+        data1.put("name", "");
+        mockMvc.perform(post("/api/tags")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data1)))
+            .andExpect(status().isUnprocessableEntity());
+
+        // Name too short
+        HashMap<String, String> data2 = new HashMap<>();
+        data2.put("name", "a");
+        mockMvc.perform(post("/api/tags")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data2)))
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testUpdateWithInvalidData() throws Exception {
+        Tag tag = Instancio.of(Tag.class)
+            .ignore(Select.field(Tag::getId))
+            .ignore(Select.field(Tag::getPosts))
+            .create();
+        tagRepository.save(tag);
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("name", ""); // Blank name
+
+        mockMvc.perform(put("/api/tags/{id}", tag.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data)))
+            .andExpect(status().isUnprocessableEntity());
+    }
 }

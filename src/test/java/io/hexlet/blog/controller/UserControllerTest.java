@@ -172,4 +172,57 @@ public class UserControllerTest {
         boolean deleted = userRepository.findById(user.getId()).isEmpty();
         assertThat(deleted).isEqualTo(true);
     }
+
+    @Test
+    public void testCreateWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> "")
+            .create();
+        MockHttpServletRequestBuilder request = post("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(user));
+        mockMvc.perform(request)
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testUpdateWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("email", "");
+
+        MockHttpServletRequestBuilder request = put("/api/users/" + user.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request)
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testPatchWithInvalidData() throws Exception {
+        User user = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user);
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("email", "");
+
+        MockHttpServletRequestBuilder request = patch("/api/users/" + user.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request)
+            .andExpect(status().isUnprocessableEntity());
+    }
 }
