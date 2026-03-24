@@ -264,4 +264,57 @@ public class PostControllerTest {
         boolean deleted = postRepository.findById(post.getId()).isEmpty();
         assertThat(deleted).isEqualTo(true);
     }
+
+    @Test
+    @Transactional
+    public void testFilter() throws Exception {
+        User user1 = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user1);
+        User user2 = Instancio.of(User.class)
+            .ignore(Select.field(User::getId))
+            .ignore(Select.field(User::getPosts))
+            .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .create();
+        userRepository.save(user2);
+
+        Post post1 = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .supply(Select.field(Post::getName), () -> "Unique title")
+            .create();
+        post1.setAuthor(user1);
+        postRepository.save(post1);
+
+        Post post2 = Instancio.of(Post.class)
+            .ignore(Select.field(Post::getId))
+            .ignore(Select.field(Post::getAuthor))
+            .ignore(Select.field(Post::getTags))
+            .supply(Select.field(Post::getName), () -> "Another title")
+            .create();
+        post2.setAuthor(user2);
+        postRepository.save(post2);
+
+        MvcResult result = this.mockMvc.perform(get("/api/posts/filter?titleCont=niqu"))
+            .andExpect(status().isOk())
+            .andReturn();
+        String body = result.getResponse().getContentAsString();
+        Map<String, Object> responsePage = om.readValue(body, new TypeReference<>() {});
+        List<PostDTO> posts = om.convertValue(responsePage.get("content"), new TypeReference<>() {});
+        assertThat(posts).hasSize(1);
+        assertThat(posts.getFirst().getTitle()).isEqualTo(post1.getName());
+
+        result = this.mockMvc.perform(get("/api/posts/filter?authorId=" + user2.getId()))
+            .andExpect(status().isOk())
+            .andReturn();
+        body = result.getResponse().getContentAsString();
+        responsePage = om.readValue(body, new TypeReference<>() {});
+        List<PostDTO> posts2 = om.convertValue(responsePage.get("content"), new TypeReference<>() {});
+        assertThat(posts2).hasSize(1);
+        assertThat(posts2.getFirst().getTitle()).isEqualTo(post2.getName());
+    }
 }

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class PostParamsDTO {
-    private String nameCont;
+    private String titleCont;
     private Long authorId;
     private LocalDate createdAtGt;
     private LocalDate createdAtLt;
