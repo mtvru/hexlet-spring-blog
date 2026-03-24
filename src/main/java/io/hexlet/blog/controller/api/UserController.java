@@ -1,4 +1,4 @@
-package io.hexlet.blog.controller;
+package io.hexlet.blog.controller.api;
 
 import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserDTO;

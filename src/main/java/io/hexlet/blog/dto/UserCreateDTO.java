@@ -14,4 +14,6 @@ public class UserCreateDTO {
     private LocalDate birthday;
     @NotBlank
     private String email;
+    @NotBlank
+    private String password;
 }

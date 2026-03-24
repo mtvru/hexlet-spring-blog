@@ -6,6 +6,11 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.Mapping;
+import org.mapstruct.BeforeMapping;
+import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import io.hexlet.blog.dto.UserPatchDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
@@ -19,8 +24,36 @@ import io.hexlet.blog.model.User;
     unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public abstract class UserMapper {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     // Creation: standard behavior (null -> null)
+    @Mapping(target = "passwordDigest", source = "password")
     public abstract User map(UserCreateDTO dto);
+
+    @BeforeMapping
+    public void encryptPassword(UserCreateDTO dto, @MappingTarget User user) {
+        String password = dto.getPassword();
+        if (password != null) {
+            user.setPasswordDigest(passwordEncoder.encode(password));
+        }
+    }
+
+    @BeforeMapping
+    public void encryptPassword(UserUpdateDTO dto, @MappingTarget User user) {
+        String password = dto.getPassword();
+        if (password != null) {
+            user.setPasswordDigest(passwordEncoder.encode(password));
+        }
+    }
+
+    @BeforeMapping
+    public void encryptPassword(UserPatchDTO dto, @MappingTarget User user) {
+        JsonNullable<String> password = dto.getPassword();
+        if (password != null && password.isPresent()) {
+            user.setPasswordDigest(passwordEncoder.encode(password.get()));
+        }
+    }
 
     public abstract UserDTO map(User model);
 

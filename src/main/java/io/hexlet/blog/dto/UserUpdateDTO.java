@@ -14,4 +14,6 @@ public class UserUpdateDTO {
     private LocalDate birthday;
     @NotBlank
     private String email;
+    @NotBlank
+    private String password;
 }

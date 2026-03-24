@@ -1,4 +1,4 @@
-package io.hexlet.blog.controller;
+package io.hexlet.blog.controller.api;
 
 import io.hexlet.blog.dto.PostPatchDTO;
 import io.hexlet.blog.dto.PostParamsDTO;
@@ -6,7 +6,6 @@ import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.service.PostService;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -8,3 +8,6 @@ build
 .kotlin
 
 .idea
+
+src/main/resources/certs/private.pem
+src/main/resources/certs/public.pem

@@ -14,3 +14,7 @@ spring:
   output:
     ansi:
       enabled: always
+
+rsa:
+  public-key: classpath:certs/public.pem
+  private-key: classpath:certs/private.pem

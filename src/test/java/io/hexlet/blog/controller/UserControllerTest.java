@@ -21,12 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,17 +43,20 @@ public class UserControllerTest {
     private ObjectMapper om;
 
     @Test
+    @WithMockUser
     public void testIndex() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         User user2 = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user2);
         MvcResult result = this.mockMvc.perform(get("/api/users"))
@@ -62,11 +67,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testShow() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         user = userRepository.save(user);
         MvcResult result = this.mockMvc.perform(get("/api/users/" + user.getId()))
@@ -82,10 +89,14 @@ public class UserControllerTest {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> email)
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
+        Map<String, String> data = new HashMap<>();
+        data.put("email", user.getEmail());
+        data.put("password", "password");
         MockHttpServletRequestBuilder request = post("/api/users")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(om.writeValueAsString(user));
+            .content(om.writeValueAsString(data));
         MvcResult result = mockMvc.perform(request)
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").exists())
@@ -98,11 +109,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testUpdate() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
 
@@ -110,6 +123,7 @@ public class UserControllerTest {
         HashMap<String, String> data = new HashMap<>();
         data.put("firstName", newFirstName);
         data.put("email", user.getEmail());
+        data.put("password", "newpassword");
 
         MockHttpServletRequestBuilder request = put("/api/users/" + user.getId())
             .contentType(MediaType.APPLICATION_JSON)
@@ -126,6 +140,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testPatch() throws Exception {
         final String email = faker.internet().emailAddress();
         final String lastName = faker.name().lastName();
@@ -136,6 +151,7 @@ public class UserControllerTest {
             .supply(Select.field(User::getLastName), () -> lastName)
             .supply(Select.field(User::getEmail), () -> email)
             .supply(Select.field(User::getBirthday), () -> birthday)
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
 
@@ -158,11 +174,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testDelete() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         MockHttpServletRequestBuilder request = delete("/api/users/" + user.getId())
@@ -187,11 +205,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testUpdateWithInvalidData() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
 
@@ -207,11 +227,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testPatchWithInvalidData() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
 
@@ -224,5 +246,11 @@ public class UserControllerTest {
 
         mockMvc.perform(request)
             .andExpect(status().isUnprocessableEntity());
+    }
+    
+    @Test
+    public void testIndexWithoutAuth() throws Exception {
+        mockMvc.perform(get("/api/users"))
+            .andExpect(status().isUnauthorized());
     }
 }

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class JacksonConfig {
     @Bean
     Jackson2ObjectMapperBuilder objectMapperBuilder() {
-        var builder = new Jackson2ObjectMapperBuilder();
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
         builder.serializationInclusion(JsonInclude.Include.NON_NULL)
             .modulesToInstall(new JsonNullableModule());
         return builder;

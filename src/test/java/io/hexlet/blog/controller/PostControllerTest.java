@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -54,6 +54,7 @@ public class PostControllerTest {
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Tag tag = Instancio.of(Tag.class)
@@ -97,6 +98,7 @@ public class PostControllerTest {
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Tag tag = Instancio.of(Tag.class)
@@ -128,11 +130,13 @@ public class PostControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser
     public void testCreate() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Tag tag = Instancio.of(Tag.class)
@@ -166,11 +170,13 @@ public class PostControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser
     public void testUpdate() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         final boolean published = true;
@@ -209,11 +215,13 @@ public class PostControllerTest {
 
     @Test
     @Transactional
+    @WithMockUser
     public void testPatch() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         final boolean published = true;
@@ -243,11 +251,13 @@ public class PostControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testDelete() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
@@ -272,12 +282,14 @@ public class PostControllerTest {
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user1);
         User user2 = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user2);
 
@@ -319,11 +331,13 @@ public class PostControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testCreateWithInvalidData() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
 
@@ -368,11 +382,13 @@ public class PostControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testUpdateWithInvalidData() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)
@@ -394,11 +410,13 @@ public class PostControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testPatchWithInvalidData() throws Exception {
         User user = Instancio.of(User.class)
             .ignore(Select.field(User::getId))
             .ignore(Select.field(User::getPosts))
             .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+            .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password())
             .create();
         userRepository.save(user);
         Post post = Instancio.of(Post.class)

@@ -15,4 +15,5 @@ public class UserPatchDTO {
     private JsonNullable<LocalDate> birthday = JsonNullable.undefined();
     @NotBlank
     private JsonNullable<String> email = JsonNullable.undefined();
+    private JsonNullable<String> password = JsonNullable.undefined();
 }

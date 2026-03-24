@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -63,6 +64,7 @@ public class TagControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testCreate() throws Exception {
         HashMap<String, String> data = new HashMap<>();
         String name = faker.lorem().word();
@@ -80,6 +82,7 @@ public class TagControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testUpdate() throws Exception {
         Tag tag = Instancio.of(Tag.class)
             .ignore(Select.field(Tag::getId))
@@ -99,6 +102,7 @@ public class TagControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testDelete() throws Exception {
         Tag tag = Instancio.of(Tag.class)
             .ignore(Select.field(Tag::getId))
@@ -112,6 +116,7 @@ public class TagControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testCreateWithInvalidData() throws Exception {
         // Blank name
         HashMap<String, String> data1 = new HashMap<>();
@@ -131,6 +136,7 @@ public class TagControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testUpdateWithInvalidData() throws Exception {
         Tag tag = Instancio.of(Tag.class)
             .ignore(Select.field(Tag::getId))
