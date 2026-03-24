@@ -40,7 +40,7 @@ public class SecurityConfig {
         if (!isProd) {
             http.authorizeHttpRequests(auth -> auth
                     .requestMatchers("/h2-console", "/h2-console/**").permitAll()
-                ).csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+                ).csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(f -> f.sameOrigin()));
         }
 
