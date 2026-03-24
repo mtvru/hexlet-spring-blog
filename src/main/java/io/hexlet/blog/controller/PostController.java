@@ -48,7 +48,7 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> create(@Valid @RequestBody PostCreateDTO dto) {
+    public ResponseEntity<PostDTO> create(@RequestBody PostCreateDTO dto) {
         PostDTO post = this.postService.create(dto);
         URI location = ServletUriComponentsBuilder
             .fromCurrentRequest()
@@ -65,13 +65,13 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO dto) {
+    public ResponseEntity<PostDTO> update(@PathVariable Long id, @RequestBody PostUpdateDTO dto) {
         PostDTO post = this.postService.update(id, dto);
         return ResponseEntity.ok(post);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @Valid @RequestBody PostPatchDTO dto) {
+    public ResponseEntity<PostDTO> patch(@PathVariable Long id, @RequestBody PostPatchDTO dto) {
         PostDTO post = this.postService.update(id, dto);
         return ResponseEntity.ok(post);
     }

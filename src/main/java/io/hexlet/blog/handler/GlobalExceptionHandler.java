@@ -1,6 +1,7 @@
 package io.hexlet.blog.handler;
 
 import io.hexlet.blog.exception.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> validationErrors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            String shortFieldName = fieldName.substring(fieldName.lastIndexOf('.') + 1);
+            validationErrors.put(shortFieldName, violation.getMessage());
+        });
+        return buildErrorResponse(ex, HttpStatus.UNPROCESSABLE_ENTITY, "Validation failed", validationErrors);
     }
 
     @Override

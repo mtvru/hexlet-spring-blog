@@ -6,14 +6,17 @@ import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.repository.PostRepository;
 import io.hexlet.blog.specification.PostSpecification;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class PostService {
     private final PostRepository repository;
     private final PostMapper mapper;
@@ -37,7 +40,7 @@ public class PostService {
         return posts.map(this.mapper::map);
     }
 
-    public PostDTO create(PostCreateDTO dto) {
+    public PostDTO create(@Valid PostCreateDTO dto) {
         Post post = this.mapper.map(dto);
         post = this.repository.save(post);
         return this.mapper.map(post);
@@ -49,7 +52,7 @@ public class PostService {
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
     }
 
-    public PostDTO update(Long id, PostUpdateDTO dto) {
+    public PostDTO update(Long id, @Valid PostUpdateDTO dto) {
         Post post = this.repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         this.mapper.update(dto, post);
@@ -57,7 +60,7 @@ public class PostService {
         return this.mapper.map(post);
     }
 
-    public PostDTO update(Long id, PostPatchDTO dto) {
+    public PostDTO update(Long id, @Valid PostPatchDTO dto) {
         Post post = this.repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post with id " + id + " not found"));
         this.mapper.update(dto, post);
