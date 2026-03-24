@@ -9,11 +9,11 @@ logging:
     dateformat: "yyyy-MM-dd HH:mm:ss"
 
 spring:
-  profiles:
-    active: dev
   output:
     ansi:
       enabled: always
+  datasource:
+    driver-class-name: org.h2.Driver
 
 rsa:
   public-key: classpath:certs/public.pem

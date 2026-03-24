@@ -4,6 +4,7 @@ import io.hexlet.blog.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,7 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -31,11 +33,18 @@ public class SecurityConfig {
     private CustomUserDetailsService userService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, Environment env)
         throws Exception {
-        // By default, everything is prohibited
+        boolean isProd = Arrays.asList(env.getActiveProfiles()).contains("production");
+
+        if (!isProd) {
+            http.authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/h2-console", "/h2-console/**").permitAll()
+                ).csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+                .headers(headers -> headers.frameOptions(f -> f.sameOrigin()));
+        }
+
         return http
-            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
