@@ -40,17 +40,19 @@ public class SecurityConfig {
         if (!isProd) {
             http.authorizeHttpRequests(auth -> auth
                     .requestMatchers("/h2-console", "/h2-console/**").permitAll()
-                ).csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(f -> f.sameOrigin()));
+                ).headers(headers -> headers.frameOptions(f -> f.sameOrigin()));
         }
 
         return http
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tags", "/api/tags/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/about", "/welcome").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/**/*.html").permitAll()
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer((rs) -> rs.jwt((jwt) -> jwt.decoder(jwtDecoder)))
