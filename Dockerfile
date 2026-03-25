@@ -12,7 +12,7 @@ COPY ./build.gradle.kts /app/build.gradle.kts
 COPY ./gradlew /app/gradlew
 COPY ./settings.gradle.kts /app/settings.gradle.kts
 
-RUN ./gradlew clean bootJar --no-configuration-cache --no-dependency-verification
+RUN ./gradlew clean bootJar
 ENV JAVA_OPTS="-Xmx512M -Xms512M"
 EXPOSE 8080
 CMD ["java", "-jar", "build/libs/hexlet-spring-blog-0.0.1-SNAPSHOT.jar"]
