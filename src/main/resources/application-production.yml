@@ -7,5 +7,6 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update #validate
     show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
